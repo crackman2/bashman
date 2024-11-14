@@ -10,7 +10,7 @@ if paramCount() < 2:
     echo "output file"
     echo "  -r        Run file after dropping"
     echo "  -i        Enables progress indicator in batch file (WARNING, bloat)"
-    echo "  -m        Enables message ()"
+    echo "  -m        Enables start message"
     echo "  -x        Delete batch script after execution"
     echo "  -d        Delete dropped file after execution"
     echo "  -c        Disable compression"
