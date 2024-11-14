@@ -1,16 +1,16 @@
 import os, base64, math, strutils, osproc, zippy
 
 if paramCount() < 2:
-    echo "Version 0.1 by crackman2"
-    echo "Usage:   batchman [input file] [output file] [options]"
-    echo "Example: batchman file.exe     file.sh       mp"
+    echo "Version 0.2 by crackman2"
+    echo "Usage:   batchman [input file] [output file] [options] [message (m)]"
+    echo "Example: batchman file.exe     file.sh       mi        Hello World!"
     echo " Generates batch script that drops the input file"
     echo " Options:"
     echo ""
     echo "output file"
     echo "  -r        Run file after dropping"
     echo "  -i        Enables progress indicator in batch file (WARNING, bloat)"
-    echo "  -m        Enables message [Loading. Please wait] in batch file"
+    echo "  -m        Enables message ()"
     echo "  -x        Delete batch script after execution"
     echo "  -d        Delete dropped file after execution"
     echo "  -c        Disable compression"
@@ -33,7 +33,7 @@ var
     opt_messages = false  #m
     opt_suicide = false   #x
     opt_delete = false    #d
-    opt_compress = true  #c
+    opt_compress = true   #c
 
 
 if paramCount() > 2:
@@ -85,11 +85,14 @@ if opt_compress:
 
 
 result_data &= "#!/bin/bash\n"
-if opt_messages: result_data &= "echo Loading. Please wait\n"
-#if opt_indicator: result_data &= "set x=(set /p =.)\n"
+if opt_messages:
+    var msg_txt = ""
+    for i in 4..paramCount():
+        msg_txt &= paramStr(i) & " "
+    result_data &= "echo '" & msg_txt & "'\n"
 if opt_indicator: result_data &= "x=\".\"\n" & "p() { echo -n .; }\n"
 
-(input_perms, _) = execCmdEx("stat --format=%a " & input_name)
+(input_perms, _) = execCmdEx("stat --format=%a '" & input_name & "'")
 
 var
     current_progress = 0
