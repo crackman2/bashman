@@ -1,9 +1,9 @@
-import os, base64, math, strutils, osproc, zippy
+import os, base64, math, strutils, osproc, zippy, math
 
 if paramCount() < 2:
     echo "Version 0.2 by crackman2"
-    echo "Usage:   batchman [input file] [output file] [options] [message (m)]"
-    echo "Example: batchman file.exe     file.sh       mi        Hello World!"
+    echo "Usage:   bashman [input file] [output file] [options] [message (m)]"
+    echo "Example: bashman file.exe     file.sh       mizzzx    Hello World!"
     echo " Generates batch script that drops the input file"
     echo " Options:"
     echo ""
@@ -14,6 +14,7 @@ if paramCount() < 2:
     echo "  -x        Delete batch script after execution"
     echo "  -d        Delete dropped file after execution"
     echo "  -c        Disable compression"
+    echo "  -z        Increase chunksize (doubles 8K for each z)"
     echo ""
     echo "generation"
     echo "  -v        Disables printing the progress while generating"
@@ -34,7 +35,7 @@ var
     opt_suicide = false   #x
     opt_delete = false    #d
     opt_compress = true   #c
-
+    opt_sizefactor = 0     #z
 
 if paramCount() > 2:
     var opt:string = paramStr(3)
@@ -43,6 +44,8 @@ if paramCount() > 2:
     for i in opt:
         case i:
         of '-':
+            continue
+        of 'z':
             continue
         of 'r':
             opt_execute = true
@@ -59,14 +62,14 @@ if paramCount() > 2:
         of 'c':
             opt_compress = false
         else:
-            echo "Error: Invalid option [",i,"]. Run batchman without arguments for help"
+            echo "Error: Invalid option [",i,"]. Run bashman without arguments for help"
             quit(0)
-
-
+    
+    opt_sizefactor = opt.count('z')
 
 
 var
-    max_chunk_length = 8096
+    max_chunk_length = 8192
     input_name = paramStr(1)
     input_perms = ""
     output_name = paramStr(2)
@@ -77,6 +80,12 @@ var
     chunk_byte_index = 0       
     chunk_byte_index_label = 0 # Label current datachunk in final batchfile
 
+    trash = 0
+
+if opt_sizefactor > 0:
+  max_chunk_length = max_chunk_length * pow(2,opt_sizefactor.float).int
+
+  echo "Chunk size: [", max_chunk_length , " B | ", max_chunk_length div 1000, " KB | ", max_chunk_length div 1000000, " MB]"
 
 if opt_compress:
     input_data = compress(input_data)
@@ -92,7 +101,7 @@ if opt_messages:
     result_data &= "echo '" & msg_txt & "'\n"
 if opt_indicator: result_data &= "x=\".\"\n" & "p() { echo -n .; }\n"
 
-(input_perms, _) = execCmdEx("stat --format=%a '" & input_name & "'")
+(input_perms, trash) = execCmdEx("stat --format=%a '" & input_name & "'")
 
 var
     current_progress = 0
