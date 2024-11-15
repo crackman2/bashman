@@ -9,14 +9,14 @@ if paramCount() < 2:
     echo "Version 0.2 by crackman2"
     echo "Usage:   bashman [input file] [output file] [options] [message (m)]"
     echo "Example: bashman file.exe     file.sh       mizzzx    Hello World!"
-    echo " Generates batch script that drops the input file"
+    echo " Generates bash script that drops the input file"
     echo " Options:"
     echo ""
     echo "output file"
     echo "  -r        Run file after dropping"
     echo "  -i        Enables progress indicator in batch file (WARNING, bloat)"
     echo "  -m        Enables start message"
-    echo "  -x        Delete batch script after execution"
+    echo "  -x        Delete bash script after execution"
     echo "  -d        Delete dropped file after execution"
     echo "  -c        Disable compression"
     echo "  -z        Increase chunk size (doubles 8K for each z)"
@@ -70,8 +70,7 @@ if paramCount() > 2:
             echo "Error: Invalid option [",i,"]. Run bashman without arguments for help"
             quit(0)
     
-    opt_sizefactor = opt.count('z')
-
+    opt_sizefactor = opt.count('z').clamp(0..49) #clamping so we dont exceed 64bit int limit
 
 
 ## chunking the data was required in the original batchman
