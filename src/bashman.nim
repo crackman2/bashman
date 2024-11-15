@@ -1,3 +1,8 @@
+## --- TODO ---
+## -> add support for directories
+
+
+
 import os, base64, math, strutils, osproc, zippy, math
 
 if paramCount() < 2:
