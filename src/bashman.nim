@@ -33,14 +33,14 @@ if not fileExists(paramStr(1)):
 
 
 var
-    opt_execute = false   #r
-    opt_indicator = false #i
-    opt_progress = true   #v
-    opt_messages = false  #m
-    opt_suicide = false   #x
-    opt_delete = false    #d
-    opt_compress = true   #c
-    opt_sizefactor = 0     #z
+    opt_execute    = false  #r
+    opt_indicator  = false  #i
+    opt_progress   = true   #v
+    opt_messages   = false  #m
+    opt_suicide    = false  #x
+    opt_delete     = false  #d
+    opt_compress   = true   #c
+    opt_sizefactor = 0      #z
 
 if paramCount() > 2:
     var opt:string = paramStr(3)
@@ -73,20 +73,26 @@ if paramCount() > 2:
     opt_sizefactor = opt.count('z')
 
 
+
+## chunking the data was required in the original batchman
+## because batchfiles don't seem to handle large variables
+## with about 8096 chars being the limit (?)
+## it may not be required anymore but i am not sure yet
 var
-    max_chunk_length = 8192
     input_name = paramStr(1)
     input_perms = ""
     output_name = paramStr(2)
     input_data = readFile(input_name).encode()
     input_data_len = len(input_data)
     result_data = ""
-
+    
+    max_chunk_length = 8192
     chunk_byte_index = 0       
     chunk_byte_index_label = 0 # Label current datachunk in final batchfile
 
-    trash = 0
+    trash = 0 # used because _ didn't
 
+## each occurance of z doubles the chunk size
 if opt_sizefactor > 0:
   max_chunk_length = max_chunk_length * pow(2,opt_sizefactor.float).int
 
@@ -114,7 +120,6 @@ var
 
 ## Assign base64 data in chunks using set command
 while true:
-
 
     ## Check if the next chunk is going beyond EOF
     if(chunk_byte_index+max_chunk_length < input_data_len):
@@ -154,7 +159,10 @@ for i in 0..chunk_byte_index_label:
     result_data &= "echo -n $d" & $i & " >> enf.txt\n"
 
 
-
+## when compression is enabled (default) the base64 data in the bash script
+## will first decode the base64 data in enf.txt and save it as a .gz file
+## then gzip decompresses it which reveals the original base64 data from the
+## input file. thisis then again decoded to yield the input file
 if opt_compress:
     result_data &= "base64 -d enf.txt > \"" & input_name & ".gz\"\n"
     result_data &= "gzip -d " & "\"" & input_name & ".gz\"\n"
@@ -174,4 +182,4 @@ if opt_suicide: result_data &= "rm \"$0\"\n"
 echo "\nSaving to file..."
 writeFile(output_name, result_data)
 discard execCmd("chmod +x " & "\"" & output_name & "\"")
-echo "File written [", output_name, "] Size [", len(result_data), " B | ", len(result_data) div 1000, " KB | ", len(result_data) div 1000000, " MB]"
+echo "File written '", output_name, "' Size [", len(result_data), " B | ", len(result_data) div 1000, " KB | ", len(result_data) div 1000000, " MB]"
