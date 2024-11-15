@@ -19,7 +19,7 @@ if paramCount() < 2:
     echo "  -x        Delete batch script after execution"
     echo "  -d        Delete dropped file after execution"
     echo "  -c        Disable compression"
-    echo "  -z        Increase chunksize (doubles 8K for each z)"
+    echo "  -z        Increase chunk size (doubles 8K for each z)"
     echo ""
     echo "generation"
     echo "  -v        Disables printing the progress while generating"
@@ -94,11 +94,12 @@ var
 
 ## each occurance of z doubles the chunk size
 if opt_sizefactor > 0:
-  max_chunk_length = max_chunk_length * pow(2,opt_sizefactor.float).int
+    max_chunk_length = max_chunk_length * pow(2,opt_sizefactor.float).int
 
-  echo "Chunk size: [", max_chunk_length , " B | ", max_chunk_length div 1000, " KB | ", max_chunk_length div 1000000, " MB]"
+    echo "Chunk size: [", max_chunk_length , " B | ", max_chunk_length div 1000, " KB | ", max_chunk_length div 1000000, " MB]"
 
 if opt_compress:
+    echo "Compressing and encoding. This may take a while..."
     input_data = compress(input_data)
     input_data = encode(input_data)
     input_data_len = len(input_data)
